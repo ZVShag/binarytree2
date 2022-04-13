@@ -37,7 +37,7 @@ void Add(int aData, Branch*& aBranch)
 
 void print(Branch* aBranch)
 {
-	if (!aBranch) return; //Если ветки не существует - выходим. Выводить нечего
+	if (!aBranch) return; 
 	tabs += 5; //Иначе увеличим счетчик рекурсивно вызванных процедур
 	//Который будет считать нам отступы для красивого вывода
 
