@@ -1,36 +1,77 @@
 ﻿#include <iostream>
+#include <string>
 using namespace std;
 
 int tabs = 0; 
 int kol_vo = 0;
 
+class Bus 
+{
+	string number; //номер автобуса (кт042)
+	string surname; // фамилия водителя
+	string name; // имя водителя
+	int nummarshrut;// номер маршрута
+	int mesta; // кол-во мест в автобусе
+
+public:
+	Bus() { number = "none"; surname = "empty"; name = "empty"; nummarshrut = 0; mesta = 0; }
+	Bus(string anumber, string asurname, string aname, int anummarshrut,int amesta ) 
+	{
+		number = anumber;
+		surname = asurname;
+		name = aname;
+		nummarshrut = anummarshrut; 
+		mesta = amesta; 
+	}
+	int Get_number()
+	{
+		string a = this->number.substr(2, 3);
+		return  stoi(a); /* номер автобуса(только его числовая часть)*/;
+	}
+	void Printinfo()
+	{
+		cout << "Surname: " << surname << endl;
+		cout << "Name: " << name << endl;
+		cout << "Reg_number: " << number << endl;
+		cout << "Marshrut: " << nummarshrut << endl;
+		cout << "Mest: " << mesta << endl;
+	}
+	string Get_fullnumber()
+	{
+
+		return  number;
+	}
+
+
+};
+
 
 struct Branch
 {
-	int Data; 
+	Bus avtobus; 
 	Branch* LeftBranch; 
 	Branch* RightBranch;
 };
 
 
-void Add(int aData, Branch*& aBranch)
+void Add(Bus abus, Branch*& aBranch)
 {
 	if (!aBranch)
 	{ 
 		aBranch = new Branch;
-		aBranch->Data = aData;
+		aBranch->avtobus = abus;
 		aBranch->LeftBranch = 0;
 		aBranch->RightBranch = 0;
 		return;
 	}
 	else 
-		if (aBranch->Data > aData)
+		if (aBranch->avtobus.Get_number() < abus.Get_number())
 		{ 
-			Add(aData, aBranch->LeftBranch);
+			Add(abus, aBranch->LeftBranch);
 		}
 		else
 		{ 
-			Add(aData, aBranch->RightBranch);
+			Add(abus, aBranch->RightBranch);
 		};
 }
 
@@ -44,7 +85,7 @@ void print(Branch* aBranch)
 	print(aBranch->LeftBranch); //Выведем ветку и ее подветки слева
 
 	for (int i = 0; i < tabs; i++) cout << " "; //Потом отступы
-	cout << aBranch->Data << endl; //Данные этой ветки
+	aBranch->avtobus.Printinfo(); //Данные этой ветки
 
 
 	print(aBranch->RightBranch);//И ветки, что справа
@@ -57,50 +98,28 @@ void pr_obh(Branch*& aBranch)
 {
 	if (NULL == aBranch)    return;    //Если дерева нет, выходим
 
-	cout << aBranch->Data << endl; //Посетили узел
+	aBranch->avtobus.Printinfo(); //Посетили узел
 	pr_obh(aBranch->LeftBranch); //Обошли левое поддерево   
 	pr_obh(aBranch->RightBranch); //Обошли правое поддерево
 }
 
-int kol_ch(Branch*& aBranch)
-{
-	if (NULL == aBranch)    return 0;    //Если дерева нет, выходим
-
-	if (aBranch->Data % 2 == 0)
-	{
-		kol_vo++;
-	}
-	kol_ch(aBranch->LeftBranch); //Обошли левое поддерево   
-	kol_ch(aBranch->RightBranch); //Обошли правое поддерево
-	return kol_vo;
-}
-
-int summ_k(Branch*& aBranch, int k) {
-	int sum = 0;
-	if ((aBranch != NULL) && (k > 0)) {
-		sum += summ_k(aBranch->LeftBranch, k - 1);
-		sum += aBranch->Data;
-		sum += summ_k(aBranch->RightBranch, k - 1);
-	}
-	return sum;
-}
-void add_elem(int aData, Branch*& aBranch)
+void add_elem(Bus abus, Branch*& aBranch)
 {
 	if (!aBranch)
 	{
 		aBranch = new Branch;
-		aBranch->Data = aData;
+		aBranch->avtobus = abus;
 		aBranch->LeftBranch = 0;
 		aBranch->RightBranch = 0;
 		return;
 	}
 	else
 	{
-		if (aData < aBranch->Data) {
-			add_elem(aData, aBranch->LeftBranch);
+		if (abus.Get_number() < aBranch->avtobus.Get_number()) {
+			add_elem(abus, aBranch->LeftBranch);
 		}
-		else if (aData > aBranch->Data) {
-			add_elem(aData, aBranch->RightBranch);
+		else if (abus.Get_number() > aBranch->avtobus.Get_number()) {
+			add_elem(abus, aBranch->RightBranch);
 		}
 	}
 }
@@ -126,11 +145,11 @@ void FreeTree(Branch* aBranch)
 	return;
 }
 
-Branch* del_elem(Branch*& aBranch, int aData) {
+Branch* del_elem(Branch*& aBranch, string abus) {
 	if (aBranch == NULL)
 		return aBranch;
 
-	if (aData == aBranch->Data) {
+	if (abus == aBranch->avtobus.Get_fullnumber()) {
 
 		Branch* tmp;
 		if (aBranch->RightBranch == NULL)
@@ -159,10 +178,10 @@ Branch* del_elem(Branch*& aBranch, int aData) {
 		delete aBranch;
 		return tmp;
 	}
-	else if (aData < aBranch->Data)
-		aBranch->LeftBranch = del_elem(aBranch->LeftBranch, aData);
+	else if (stoi(abus.substr(2,3)) < aBranch->avtobus.Get_number())
+		aBranch->LeftBranch = del_elem(aBranch->LeftBranch, abus);
 	else
-		aBranch->RightBranch = del_elem(aBranch->RightBranch, aData);
+		aBranch->RightBranch = del_elem(aBranch->RightBranch, abus);
 	return aBranch;
 }
 
@@ -171,8 +190,6 @@ int main()
 	setlocale(LC_ALL, "rus");
 	Branch* Root = 0;
 	int vel;
-	int element;
-	int k;
 
 	cout << "Введите кол-во элементов для будущего дерева: ";
 	cin >> vel;
@@ -184,7 +201,24 @@ int main()
 
 	for (int i = 0; i < vel; i++)
 	{
-		Add(rand() % 100, Root);
+		cout << "Surname: " << endl;
+		string sname;
+		cin >> sname;
+		cout << "Name: " << endl;
+		string name;
+		cin >> name;
+		cout << "Reg_number: " << endl;
+		string rn;
+		cin >> rn;
+		cout << "Marshrut: " << endl;
+		int mt;
+		cin >> mt;
+		cout << "Mest: " <<endl;
+		int side;
+		cin >> side;
+		Bus nbus(rn,sname,name,mt,side);
+		/* заполнить объек Автобус*/
+		Add(nbus, Root);
 	}
 
 	cout << "Проверим дерево на пустоту после его заполнения: " << endl;
@@ -201,28 +235,38 @@ int main()
 
 	cout << "Добавим новый элемент в бинарное дерево:" << endl;
 	cout << "Введите новый элемент: ";
-	cin >> element;
-	add_elem(element, Root);
+	cout << "Surname: " << endl;
+	string sname;
+	cin >> sname;
+	cout << "Name: " << endl;
+	string name;
+	cin >> name;
+	cout << "Reg_number: " << endl;
+	string rn;
+	cin >> rn;
+	cout << "Marshrut: " << endl;
+	int mt;
+	cin >> mt;
+	cout << "Mest: " << endl;
+	int side;
+	cin >> side;
+	Bus nbus(rn, sname, name, mt, side);
+	add_elem(nbus, Root);
 
 	cout << "Вывод бинарного дерева: " << endl;
 	print(Root);
 	cout << endl;
 
 	cout << "Удалим элемент из бинарного дерева:" << endl;
-	cout << "Введите нэлемент: ";
-	cin >> element;
-	del_elem(Root, element);
+	cout << "Введите элемент: ";
+	string num;
+	cin >> num;
+	del_elem(Root, num);
 
 	cout << "Вывод бинарного дерева: " << endl;
 	print(Root);
 	cout << endl;
 
-	cout << "Посчитаем кол-во четных элементов в дереве: ";
-	cout << kol_ch(Root) << endl;
-
-	cout << "Посчитаем сумму элементов в дереве на уровне ";
-	cin >> k;
-	cout << summ_k(Root, k) << endl;
 
 	FreeTree(Root);
 	cout << "Вся динамическая память очищена..." << endl;
